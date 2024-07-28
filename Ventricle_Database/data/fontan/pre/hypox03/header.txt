@@ -1,0 +1,27 @@
+#LeftVentricle
+Number of frames   		14
+Number of vertices 		862
+Number of triangles		1720
+
+
+#Timing Information
+Average RR Duration		700.419		ms
+Enddiastole time   		50.176		ms
+Endsystole time    		376.705		ms
+
+
+#Timestamps
+0		ms
+50.176		ms
+100.352		ms
+150.528		ms
+200.704		ms
+250.88		ms
+301.056		ms
+351.232		ms
+401.408		ms
+451.584		ms
+501.76		ms
+551.936		ms
+602.112		ms
+652.288		ms
