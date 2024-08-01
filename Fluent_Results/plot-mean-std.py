@@ -3,25 +3,15 @@ import matplotlib.pyplot as plt
 import re
 import os
 
-# Timing Information (converted to seconds)
-RR_DURATION = 0.923077  # in seconds
-END_DIASTOLE_TIME = 0.597829  # in seconds
-END_SYSTOLE_TIME = 0.325248  # in seconds
+# Load time information from the CSV file
+time_info_df = pd.read_csv('time_information.csv')
 
-# SI units for the results
-Y_AXIS_UNITS = {
-    'avrg-wss.out': 'Wall Shear Stress (Pa)',
-    'energy-loss.out': 'Energy Loss (J)',
-    'flow-valves-av.out': 'Flow (m³/s)',
-    'flow-valves-mv.out': 'Flow (m³/s)',
-    'report-flow-av': 'Flow (m³/s)',
-    'report-flow-mv': 'Flow (m³/s)',
-    'report-ven-ave-vel-inlet-rfile.out': 'Velocity (m/s)',
-    'report-ven-ave-vel-outlet-rfile.out': 'Velocity (m/s)',
-    'report-ven-kin-energy-rfile.out': 'Kinetic Energy (J)',
-    'tvpg.out': 'Pressure Gradient (Pa)',
-    'ven-vol.out': 'Volume (m³)',
-}
+def get_time_info(case_name):
+    case_row = time_info_df[time_info_df['Case'] == case_name]
+    if not case_row.empty:
+        return case_row.iloc[0]['RR_DURATION'], case_row.iloc[0]['END_DIASTOLE_TIME'], case_row.iloc[0]['END_SYSTOLE_TIME']
+    else:
+        raise ValueError(f"Timing information for case '{case_name}' not found.")
 
 def read_out_file(file_path):
     with open(file_path, 'r') as file:
@@ -35,7 +25,7 @@ def read_out_file(file_path):
     df = pd.DataFrame(data_lines).apply(pd.to_numeric)
     return df
 
-def process_file(file_path, column_index, label, use_absolute_value=False):
+def process_file(file_path, column_index, label, rr_duration, end_diastole_time, use_absolute_value=False):
     data = read_out_file(file_path)
     
     total_timesteps = len(data)
@@ -44,15 +34,15 @@ def process_file(file_path, column_index, label, use_absolute_value=False):
     last_cycle_data = data.tail(iterations_per_cycle).copy()
 
     last_cycle_timesteps = len(last_cycle_data)
-    time_step_size = RR_DURATION / last_cycle_timesteps
+    time_step_size = rr_duration / last_cycle_timesteps
     last_cycle_data['Actual_Time'] = (last_cycle_data.index - last_cycle_data.index.min()) * time_step_size
 
     y_values = last_cycle_data.iloc[:, column_index]
     if use_absolute_value:
         y_values = y_values.abs()
 
-    diastolic_data = last_cycle_data[last_cycle_data['Actual_Time'] <= END_DIASTOLE_TIME].iloc[:, column_index]
-    systolic_data = last_cycle_data[last_cycle_data['Actual_Time'] > END_DIASTOLE_TIME].iloc[:, column_index]
+    diastolic_data = last_cycle_data[last_cycle_data['Actual_Time'] <= end_diastole_time].iloc[:, column_index]
+    systolic_data = last_cycle_data[last_cycle_data['Actual_Time'] > end_diastole_time].iloc[:, column_index]
 
     if use_absolute_value:
         diastolic_data = diastolic_data.abs()
@@ -74,26 +64,23 @@ def process_file(file_path, column_index, label, use_absolute_value=False):
         'systolic_std': systolic_std
     }
 
-directory = os.path.join(os.path.dirname(__file__), 'hypox01_pre_turb')
+# Adjust the directory and file column mapping as necessary
+directory = os.path.join(os.path.dirname(__file__), 'hypox01_pre')
 
 file_column_mapping = {
-    'avrg-wss.out': [2],
-    'energy-loss.out': [2],
-    'flow-valves-av.out': [2],
-    'flow-valves-mv.out': [3],
-    'report-ven-ave-vel-inlet-rfile.out': [1],
-    'report-ven-ave-vel-outlet-rfile.out': [1],
-    'report-ven-kin-energy-rfile.out': [1],
-    'tvpg.out': [2],
-    'ven-vol.out': [2],
+    'ventricle-average-wss.out': [1],  # Example files
+    'ventricle-energy-loss.out': [2],
+    'ventricle-average-pressure.out': [1],
+    # Add more mappings here
 }
 
 file_column_labels = {
-    'flow-valves-av.out': ['report-flow-av'],
-    'flow-valves-mv.out': ['report-flow-mv'],
+    'ventricle-average-wss.out': ['Wall Shear Stress'],
+    'ventricle-energy-loss.out': ['Energy Loss'],
+    # Add more label mappings here
 }
 
-absolute_value_columns = ['flow-valves-av.out']
+absolute_value_columns = ['ventricle-average-wss.out']
 
 results = []
 
@@ -101,29 +88,31 @@ fig, axs = plt.subplots(3, 3, figsize=(12, 12))
 
 i = 0
 for file_name, column_indices in file_column_mapping.items():
-    if file_name in ['flow-valves-av.out', 'flow-valves-mv.out']:
-        original_file_name = 'flow-valves.out'
-    else:
-        original_file_name = file_name
-    file_path = os.path.join(directory, original_file_name)
+    case_name = directory.split(os.sep)[-1]
+    try:
+        rr_duration, end_diastole_time, end_systole_time = get_time_info(case_name)
+    except ValueError as e:
+        print(e)
+        continue
+
+    file_path = os.path.join(directory, file_name)
     if os.path.exists(file_path):
         labels = file_column_labels.get(file_name, [os.path.basename(file_name)] * len(column_indices))
         
-        # Set use_absolute_value to True for 'report-flow-av.out'
-        use_absolute = file_name in absolute_value_columns or file_name == 'report-flow-av.out'
+        use_absolute = file_name in absolute_value_columns
         
         for col_idx, label in zip(column_indices, labels):
             ax = axs[i // 3, i % 3]
-            result = process_file(file_path, col_idx, label, use_absolute_value=use_absolute)
+            result = process_file(file_path, col_idx, label, rr_duration, end_diastole_time, use_absolute_value=use_absolute)
             results.append(result)
-            # Plotting
+
             data = read_out_file(file_path)
             total_timesteps = len(data)
             iterations_per_cycle = total_timesteps // 3
 
             last_cycle_data = data.tail(iterations_per_cycle).copy()
             last_cycle_timesteps = len(last_cycle_data)
-            time_step_size = RR_DURATION / last_cycle_timesteps
+            time_step_size = rr_duration / last_cycle_timesteps
             last_cycle_data['Actual_Time'] = (last_cycle_data.index - last_cycle_data.index.min()) * time_step_size
 
             y_values = last_cycle_data.iloc[:, col_idx]
@@ -135,7 +124,7 @@ for file_name, column_indices in file_column_mapping.items():
             ax.set_xlabel('Time (s)')
             ax.set_ylabel(y_label)
             ax.set_title(f"{os.path.basename(file_path)} - {label}")
-            ax.axvline(x=END_DIASTOLE_TIME, color='r', linestyle='--', label='End-Diastole')
+            ax.axvline(x=end_diastole_time, color='r', linestyle='--', label='End-Diastole')
             ax.legend()
             ax.grid(True)
             i += 1
