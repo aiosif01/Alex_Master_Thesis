@@ -28,7 +28,15 @@ except ValueError as e:
 
 # Manually select which .out files to work on
 selected_files = [
-    'velocity-plane-over-valves.out',  # Add or remove files as needed
+    # 'velocity-plane-over-valves.out',
+    # 'ventricle-average-kinetic-energy.out',
+    # 'ventricle-average-pressure.out',
+    # 'ventricle-average-turbulent-kinetic-energy.out',
+    # 'ventricle-average-velocity-inlet.out',
+    # 'ventricle-average-velocity-outlet.out',
+    'ventricle-average-wss.out',
+    'ventricle-energy-loss.out',
+    'ventricle-volume.out'
 ]
 
 # Process each selected .out file
@@ -50,8 +58,8 @@ for file_name in selected_files:
 
         # Assuming the first column is time steps, second is variable of interest, and third is flow time
         time_steps = df.iloc[:, 0]
-        variable_data = df.iloc[:, 1]
-        flow_time = pd.to_numeric(df.iloc[:, 2], errors='coerce')  # Convert to numeric
+        variable_data = df.iloc[:, 2]
+        flow_time = pd.to_numeric(df.iloc[:, 1], errors='coerce')  # Convert to numeric
 
         # Determine the number of steps in one cardiac cycle
         num_timesteps_per_cycle = len(time_steps) // 3
@@ -79,18 +87,20 @@ for file_name in selected_files:
         # Include all remaining points in the systolic phase
         systolic_data = third_cycle_data.iloc[diastolic_end_idx:]
 
-        # Print to check the extracted data
-        print(f"Diastolic data for {file_name}:")
-        print(diastolic_data)
-        print(f"Systolic data for {file_name}:")
-        print(systolic_data)
-
-        # Save the diastolic and systolic data into a single CSV file
+        # Prepare the output file path
         output_file_path = os.path.join(directory_path, f'{os.path.splitext(file_name)[0]}_output.csv')
+
+        # Write the data to the output file in the required format
         with open(output_file_path, 'w') as f:
-            # Write diastolic data in the first row
+            # Write the total number of diastolic data in the first line
+            f.write(f"Total Diastolic Data: {len(diastolic_data)}\n")
+            # Write the diastolic data in the second row
             f.write(','.join(map(str, diastolic_data.tolist())) + '\n')
-            # Write systolic data in the second row
+            # Write a blank line
+            f.write('\n')
+            # Write the total number of systolic data
+            f.write(f"Total Systolic Data: {len(systolic_data)}\n")
+            # Write the systolic data
             f.write(','.join(map(str, systolic_data.tolist())) + '\n')
 
         print(f"Processed and saved diastolic and systolic data for {file_name} into {output_file_path}")
