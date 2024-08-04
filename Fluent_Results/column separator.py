@@ -69,14 +69,15 @@ for file_name in selected_files:
         if systolic_end_idx < num_timesteps_per_cycle and first_cycle_flow_time.iloc[systolic_end_idx] < END_DIASTOLE_TIME + END_SYSTOLE_TIME:
             systolic_end_idx += 1
 
-        # Use the same indices to extract data from the third cycle
+        # Use the same indices to extract data from the third cycle onwards
         start_third_cycle = 2 * num_timesteps_per_cycle
-        third_cycle_flow_time = flow_time[start_third_cycle:start_third_cycle + num_timesteps_per_cycle].reset_index(drop=True)
-        third_cycle_data = variable_data[start_third_cycle:start_third_cycle + num_timesteps_per_cycle].reset_index(drop=True)
+        third_cycle_data = variable_data[start_third_cycle:].reset_index(drop=True)
 
-        # Extract diastolic and systolic data
-        diastolic_data = third_cycle_data.iloc[:diastolic_end_idx]
-        systolic_data = third_cycle_data.iloc[diastolic_end_idx:systolic_end_idx]
+        # Shift selections:
+        # Exclude the first point from diastolic
+        diastolic_data = third_cycle_data.iloc[1:diastolic_end_idx]  # Exclude the first data point
+        # Include all remaining points in the systolic phase
+        systolic_data = third_cycle_data.iloc[diastolic_end_idx:]
 
         # Print to check the extracted data
         print(f"Diastolic data for {file_name}:")
