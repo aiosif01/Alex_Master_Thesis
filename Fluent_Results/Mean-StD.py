@@ -5,21 +5,18 @@ import numpy as np
 # Define the directory path
 directory_path = 'C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Fluent_Results/hypox01_pre'  # Replace with your correct path
 
-# List of CSV files to process
-csv_files = [
-    'ventricle-average-kinetic-energy_TESToutput.csv',
-    # 'another-file.csv',  # Add more files as needed
-    # 'yet-another-file.csv',
-]
-
-# Set the multiplier for unit conversion (e.g., 1000 for Joules to milliJoules)
-multiplier = 1  # Change as needed
+# Dictionary mapping CSV files to their corresponding multipliers
+csv_files = {
+    'ventricle-average-kinetic-energy_TESToutput.csv': 1,   # No unit conversion
+    # 'another-file.csv': 1000,   # Convert from Joules to milliJoules
+    # Add more files and their multipliers as needed
+}
 
 # Initialize lists to store results
 results = []
 
 # Process each CSV file
-for csv_file_name in csv_files:
+for csv_file_name, multiplier in csv_files.items():
     csv_file = os.path.join(directory_path, csv_file_name)
 
     # Read the CSV file
