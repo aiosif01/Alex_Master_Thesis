@@ -13,8 +13,8 @@ def get_time_info(case_name):
         raise ValueError(f"Timing information for case '{case_name}' not found.")
 
 # Manually select the case name and directory path
-case_name = 'hypox01_post'  # Replace with the desired case name
-directory_path = 'C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Fluent_Results/hypox01_post'  # Replace with the correct path
+case_name = 'hypox01_pre'  # Replace with the desired case name
+directory_path = 'C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Fluent_Results/hypox01_pre'  # Replace with the correct path
 
 # Get the time information for the selected case
 try:
@@ -28,15 +28,7 @@ except ValueError as e:
 
 # Manually select which .out files to work on
 selected_files = [
-    # 'velocity-plane-over-valves.out',
-    # 'ventricle-average-kinetic-energy.out',
-    # 'ventricle-average-pressure.out',
-    # 'ventricle-average-turbulent-kinetic-energy.out',
-    # 'ventricle-average-velocity-inlet.out',
-    # 'ventricle-average-velocity-outlet.out',
-    'ventricle-average-wss.out',
-    'ventricle-energy-loss.out',
-    'ventricle-volume.out'
+    'ventricle-average-kinetic-energy.out'
 ]
 
 # Process each selected .out file
@@ -58,13 +50,13 @@ for file_name in selected_files:
 
         # Assuming the first column is time steps, second is variable of interest, and third is flow time
         time_steps = df.iloc[:, 0]
-        variable_data = df.iloc[:, 2]
-        flow_time = pd.to_numeric(df.iloc[:, 1], errors='coerce')  # Convert to numeric
+        variable_data = df.iloc[:, 1]
+        flow_time = pd.to_numeric(df.iloc[:, 2], errors='coerce')  # Convert to numeric
 
         # Determine the number of steps in one cardiac cycle
         num_timesteps_per_cycle = len(time_steps) // 3
 
-        # Indices for the first cycle
+        # Extract the flow time of the first cardiac cycle
         first_cycle_flow_time = flow_time[:num_timesteps_per_cycle].reset_index(drop=True)
 
         # Determine the indices that match the end of diastolic and systolic phases
@@ -79,29 +71,32 @@ for file_name in selected_files:
 
         # Use the same indices to extract data from the third cycle onwards
         start_third_cycle = 2 * num_timesteps_per_cycle
-        third_cycle_data = variable_data[start_third_cycle:].reset_index(drop=True)
+        third_cycle_data = variable_data[start_third_cycle:start_third_cycle + num_timesteps_per_cycle + 1].reset_index(drop=True)
+        third_cycle_flow_time = pd.concat([first_cycle_flow_time, pd.Series([RR_DURATION])]).reset_index(drop=True)
 
-        # Shift selections:
-        # Exclude the first point from diastolic
-        diastolic_data = third_cycle_data.iloc[1:diastolic_end_idx]  # Exclude the first data point
-        # Include all remaining points in the systolic phase
-        systolic_data = third_cycle_data.iloc[diastolic_end_idx:]
+        # Separate diastolic and systolic data based on indices
+        diastolic_data = third_cycle_data.iloc[:diastolic_end_idx].reset_index(drop=True)
+        diastolic_flow_time = third_cycle_flow_time.iloc[:diastolic_end_idx].reset_index(drop=True)
+
+        # Insert zero as the first diastolic flow time
+        diastolic_flow_time.iloc[0] = 0
+
+        systolic_data = third_cycle_data.iloc[diastolic_end_idx:systolic_end_idx + 1].reset_index(drop=True)
+        systolic_flow_time = third_cycle_flow_time.iloc[diastolic_end_idx:systolic_end_idx + 1].reset_index(drop=True)
+
+        # Combine into a DataFrame with four columns
+        output_df = pd.DataFrame({
+            'Diastolic Flow Time': diastolic_flow_time,
+            'Diastolic Data': diastolic_data,
+            'Systolic Flow Time': systolic_flow_time,
+            'Systolic Data': systolic_data
+        })
 
         # Prepare the output file path
-        output_file_path = os.path.join(directory_path, f'{os.path.splitext(file_name)[0]}_output.csv')
+        output_file_path = os.path.join(directory_path, f'{os.path.splitext(file_name)[0]}_TESToutput.csv')
 
-        # Write the data to the output file in the required format
-        with open(output_file_path, 'w') as f:
-            # Write the total number of diastolic data in the first line
-            f.write(f"Total Diastolic Data: {len(diastolic_data)}\n")
-            # Write the diastolic data in the second row
-            f.write(','.join(map(str, diastolic_data.tolist())) + '\n')
-            # Write a blank line
-            f.write('\n')
-            # Write the total number of systolic data
-            f.write(f"Total Systolic Data: {len(systolic_data)}\n")
-            # Write the systolic data
-            f.write(','.join(map(str, systolic_data.tolist())) + '\n')
+        # Write the DataFrame to the output file
+        output_df.to_csv(output_file_path, index=False)
 
         print(f"Processed and saved diastolic and systolic data for {file_name} into {output_file_path}")
     else:
