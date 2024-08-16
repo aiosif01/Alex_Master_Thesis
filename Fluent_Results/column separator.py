@@ -28,7 +28,7 @@ except ValueError as e:
 
 # Manually select which .out files to work on
 selected_files = [
-    'ventricle-average-kinetic-energy.out'
+    'ventricle-energy-loss.out'
 ]
 
 # Process each selected .out file
@@ -93,7 +93,7 @@ for file_name in selected_files:
         })
 
         # Prepare the output file path
-        output_file_path = os.path.join(directory_path, f'{os.path.splitext(file_name)[0]}_TESToutput.csv')
+        output_file_path = os.path.join(directory_path, f'{os.path.splitext(file_name)[0]}.csv')
 
         # Write the DataFrame to the output file
         output_df.to_csv(output_file_path, index=False)
