@@ -1,14 +1,16 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+
+# Import the necessary functions
 from functions.header_processing import parse_timestamps_from_header, parse_rr_duration_from_header
 from functions.volume_analysis import calculate_average_volume_difference, plot_volumes_and_differences
-from functions.volume_derivative import calculate_dv_dt, min_max_dv_dt, plot_dv_dt
+from functions.volume_derivative import calculate_dv_dt, min_max_dv_dt, plot_dv_dt, process_volume_derivative  # Ensure process_volume_derivative is imported
 from functions.doppler_areas import read_doppler_data, calculate_valve_areas, plot_mitral_valve_shape
 from functions.output import print_time_information, print_volume_information, print_average_volume_difference, print_velocity, print_valve_results, print_reynolds_number
 from functions.reynolds import calculate_reynolds_number
 
-# Predefined short valve diameters for each patient (in mm)
+# Average short diameter of MV for each patient (in mm)
 short_valve_diameters = {
     'hypox01': 24.35,
     'hypox08': 28.0,
@@ -158,7 +160,8 @@ def process_single_case(case):
     # Plot results
     figs = []
     figs.append(plot_volumes_and_differences(rr_duration_timestamps, old_volumes, new_volumes))
-    figs.append(plot_dv_dt(rr_duration_timestamps, dv_dt))
+    min_dv_dt, max_dv_dt, dv_dt_fig = process_volume_derivative(old_volumes, rr_duration_timestamps)
+    figs.append(dv_dt_fig)
     figs.append(plot_mitral_valve_shape(valve_areas[4], valve_areas[5], valve_areas[6]))
 
     for fig in figs:

@@ -29,6 +29,21 @@ def read_volumes(file_path):
     
     return volumes
 
+def normalize_time(timestamps):
+    """
+    Normalize the time intervals to the range [0, 1].
+    
+    Parameters:
+    - timestamps: Original time intervals.
+    
+    Returns:
+    - normalized_time: Normalized time intervals.
+    """
+    min_time = min(timestamps)
+    max_time = max(timestamps)
+    normalized_time = [(t - min_time) / (max_time - min_time) for t in timestamps]
+    return normalized_time
+
 def calculate_average_volume_difference(old_volumes, new_volumes):
     volume_differences = [new - old for old, new in zip(old_volumes, new_volumes)]
     average_difference = np.mean(volume_differences)
@@ -39,19 +54,22 @@ def calculate_percentage_differences(old_volumes, new_volumes):
     return percentage_differences
 
 def plot_volumes_and_differences(timestamps, old_volumes, new_volumes):
+    # Normalize timestamps
+    normalized_time = normalize_time(timestamps)
+
     percentage_differences = calculate_percentage_differences(old_volumes, new_volumes)
     ventricles = [f'ventricle_{i}' for i in range(len(percentage_differences))]
-
+    plt.style.use('ggplot')
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=False)
 
-    # Line plot for volumes with ms timestamps
-    ax1.plot(timestamps, old_volumes, label='Old Volumes', marker='o', linestyle='-')
-    ax1.plot(timestamps, new_volumes, label='New Volumes', marker='o', linestyle='-')
+    # Line plot for volumes with normalized time
+    ax1.plot(normalized_time, old_volumes, label='Old Volumes', marker='o', linestyle='-')
+    ax1.plot(normalized_time, new_volumes, label='New Volumes', marker='o', linestyle='-')
     ax1.set_ylabel('Volume (ml)')
-    ax1.set_title('Volumes Over Time')
+    ax1.set_title('Volumes Over Time (Normalized)')
     ax1.legend()
     ax1.grid(True)
-    ax1.set_xlabel('Time (ms)')
+    ax1.set_xlabel('Normalized Time (0-1)')
 
     # Bar plot for percentage differences with ventricle labels
     ax2.bar(ventricles, percentage_differences, width=0.5, color='skyblue', alpha=0.7)
