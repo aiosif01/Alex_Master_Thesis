@@ -51,12 +51,12 @@ except ValueError as e:
 
 # Manually select which .out files to work on
 selected_files = [
-    'ventricle-average-velocity-inlet.out',
-    'ventricle-average-velocity-outlet.out',
     'ventricle-average-kinetic-energy.out',
     'ventricle-average-turbulent-kinetic-energy.out',
+    'ventricle-average-velocity-inlet.out',
+    'ventricle-average-velocity-outlet.out',
     'ventricle-average-wss.out',
-    'ventricle-energy-loss.out'
+    'ventricle-energy-loss.out',
 ]
 
 # Process each selected .out file
@@ -169,8 +169,8 @@ for file_name in selected_files:
         plt.ylabel('Variable of Interest')
         plt.title('Comparison of Raw Data and Interpolated Data')
 
-        # Ensure the y-axis scale is correct to see both raw and interpolated data
-        plt.ylim([combined_data.min() * 0.5, combined_data.max() * 1.1])
+        # # Ensure the y-axis scale is correct to see both raw and interpolated data
+        # plt.ylim([combined_data.min() * 0.5, combined_data.max() * 1.1])
 
         # Add grid and legend
         plt.grid(True)
