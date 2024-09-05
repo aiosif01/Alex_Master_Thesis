@@ -10,7 +10,7 @@ from functions.doppler_areas import read_doppler_data, calculate_valve_areas, pl
 from functions.output import print_time_information, print_volume_information, print_average_volume_difference, print_velocity, print_valve_results, print_reynolds_number
 from functions.reynolds import calculate_reynolds_number
 
-# Average short diameter of MV for each patient (in mm)
+# Predefined short diameter of MV for each patient (in mm)
 short_valve_diameters = {
     'hypox01': 24.35,
     'hypox08': 28.0,
