@@ -1,0 +1,36 @@
+Average RR Duration: 700.42 ms
+Enddiastole Time: 323.71 ms
+Endsystole Time: 376.70 ms
+
+Raw
+Max volume (EDV): 96.8308 ml at position: 8
+Min volume (ESV): 45.5485 ml at position: 0
+Stroke volume: 51.2823 ml
+
+Reconstructed
+Max volume (EDV): 95.5874 ml at position: 8
+Min volume (ESV): 46.6532 ml at position: 0
+Stroke volume: 48.9342 ml
+
+Average Volume Difference: -0.6073 ml
+
+Max Velocity (Aortic): 51.72 cm/s
+Max Velocity (Mitral): 62.77 cm/s
+
+Min dV/dt (Aortic): -0.2499 ml/ms
+Max dV/dt (Mitral): 0.3465 ml/ms
+
+--- AORTIC VALVE RESULTS ---
+Aortic Valve Area: 483.2345 mm^2
+Aortic Valve Radius: 13.9946 mm
+
+--- MITRAL VALVE RESULTS ---
+Mitral Valve Area: 552.0820 mm^2
+Updated Mitral Valve Area (after iterations): 552.0820 mm^2
+Mitral Valve Long Axis Radius (after iterations): 14.6064 mm
+Mitral Valve Upper Short Axis Radius: 8.9375 mm
+Mitral Valve Lower Short Axis Radius: 15.1250 mm
+Mitral Valve Hydraulic Diameter: 26.2190 mm
+Mitral Valve Circumference: 84.2261 mm
+
+Reynolds Number (Mitral Valve): 4692.67 (Turbulent flow)
