@@ -1,0 +1,7 @@
+# Paths to required files and directories
+directory_base_path=C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Fluent_Results
+time_info_path=C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Fluent_Results/time_information.csv
+volume_base_path=C:/Users/alexi/Desktop/GitHub/Alex_Master_Thesis/Ventricle_Database/data/volumes/reconstructed
+
+# Case selection (change this to select a different case)
+selected_case=hypox03_post

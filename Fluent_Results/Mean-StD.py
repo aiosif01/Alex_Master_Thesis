@@ -131,7 +131,7 @@ for csv_file_name, options in csv_files.items():
     elif 'kinetic-energy' in csv_file_name:
         # Convert interpolated volumes to m³ before using them for conversion
         volumes_in_m3 = volume_df['Interpolated Volumes'] / 1e6
-        # Calculate kinetic energy as dynamic pressure * volume
+        # Calculate kinetic energy as dynamic pressure * volume [Joules]
         KE_J = df['Interpolated Data'] * volumes_in_m3
 
         # Convert KE to mJ
@@ -144,7 +144,7 @@ for csv_file_name, options in csv_files.items():
         KE_J_per_m3 = KE_mJ_per_ml * 1000
 
         df['Converted Data'] = KE_J_per_m3
-        plot_data['KE'] = (df['Normalized Time'], KE_mJ)
+        # plot_data['KE'] = (df['Normalized Time'], KE_mJ)
 
     else:
         # For other data types, use 'Interpolated Data' directly
