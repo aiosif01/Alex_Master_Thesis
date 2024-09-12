@@ -13,11 +13,11 @@ from functions.reynolds import calculate_reynolds_number
 # Predefined short diameter of MV for each patient (in mm)
 short_valve_diameters = {
     'hypox01': 24.35,
-    'hypox08': 28.0,
-    'hypox20': 30.0,
-    'hypox09': 24.5,
-    'hypox03': 27.5,
-    'hypox28': 28.5
+    'hypox08': 25.0,
+    # 'hypox20': 2.0,
+    'hypox03': 22.5,
+    'hypox09': 22.5,
+    # 'hypox28': 28.5
 }
 
 def read_volumes_from_file(file_path):
